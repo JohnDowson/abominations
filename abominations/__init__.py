@@ -7,7 +7,7 @@ class IntWithTimes(int):
                 exec(codestring, _glob, _locs)
             return self
         else:
-            return range(self)
+            return RangeWithEach(self)
 
 class ListWithEach(list):
     def each(self, codestring):
@@ -33,6 +33,31 @@ class ListWithEach(list):
             elif isinstance(obj, str): obj.join(str(result))
             else: obj.append(_results[-1])
         return obj
+
+class RangeWithEach():
+    def __init__(self, *args, **kwargs):
+        self.range = range(*args, **kwargs)
+
+    def __iter__(self):
+        for n in self.range:
+            yield IntWithTimes(n)
+
+    def __contains__(self, i):
+        return i in self.range
+
+    def __getitem__(self, i):
+        if isinstance(i, slice):
+            ret = RangeWithEach(0)
+            ret.range = self.range[i]
+            return ret
+        else:
+            return IntWithTimes(self.range[i])
+    
+    def each(self, codestring):
+        _glob = globals()
+        for _t_ in self:
+            exec(codestring, _glob, {'item':_t_})
+        return self
 
 if __name__ == "__main__":
 
